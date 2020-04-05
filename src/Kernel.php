@@ -1,54 +1,63 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace App;
 
+use Iterator;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
+use Symplify\AutoBindParameter\DependencyInjection\CompilerPass\AutoBindParameterCompilerPass;
+use Symplify\Autodiscovery\Discovery;
+use Symplify\AutowireArrayParameter\DependencyInjection\CompilerPass\AutowireArrayParameterCompilerPass;
+use Symplify\FlexLoader\Flex\FlexLoader;
+use Symplify\PackageBuilder\DependencyInjection\CompilerPass\AutoReturnFactoryCompilerPass;
 
-class Kernel extends BaseKernel
+final class Kernel extends \Symfony\Component\HttpKernel\Kernel
 {
+
     use MicroKernelTrait;
 
-    private const CONFIG_EXTS = '.{php,xml,yaml,yml}';
+    private FlexLoader $flexLoader;
 
-    public function registerBundles(): iterable
+    private Discovery $discovery;
+
+    public function __construct(string $environment, bool $debug)
     {
-        $contents = require $this->getProjectDir().'/config/bundles.php';
-        foreach ($contents as $class => $envs) {
-            if ($envs[$this->environment] ?? $envs['all'] ?? false) {
-                yield new $class();
-            }
-        }
+        parent::__construct($environment, $debug);
+
+        $this->flexLoader = new FlexLoader($environment, $this->getProjectDir());
+        $this->discovery = new Discovery($this->getProjectDir());
     }
 
-    public function getProjectDir(): string
+    public function registerBundles(): Iterator
     {
-        return \dirname(__DIR__);
+        return $this->flexLoader->loadBundles();
     }
 
-    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
+    protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader): void
     {
-        $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
-        $container->setParameter('container.dumper.inline_class_loader', \PHP_VERSION_ID < 70400 || $this->debug);
-        $container->setParameter('container.dumper.inline_factories', true);
-        $confDir = $this->getProjectDir().'/config';
+        $this->discovery->discoverTemplates($containerBuilder);
 
-        $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
-        $loader->load($confDir.'/{packages}/'.$this->environment.'/*'.self::CONFIG_EXTS, 'glob');
-        $loader->load($confDir.'/{services}'.self::CONFIG_EXTS, 'glob');
-        $loader->load($confDir.'/{services}_'.$this->environment.self::CONFIG_EXTS, 'glob');
+        $this->flexLoader->loadConfigs(
+            $containerBuilder, $loader, [
+                // project packages
+                $this->getProjectDir() . '/packages/*/config/*',
+            ]
+        );
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    protected function configureRoutes(RouteCollectionBuilder $routeCollectionBuilder): void
     {
-        $confDir = $this->getProjectDir().'/config';
+        $this->discovery->discoverRoutes($routeCollectionBuilder);
+        $this->flexLoader->loadRoutes($routeCollectionBuilder);
+    }
 
-        $routes->import($confDir.'/{routes}/'.$this->environment.'/*'.self::CONFIG_EXTS, '/', 'glob');
-        $routes->import($confDir.'/{routes}/*'.self::CONFIG_EXTS, '/', 'glob');
-        $routes->import($confDir.'/{routes}'.self::CONFIG_EXTS, '/', 'glob');
+    protected function build(ContainerBuilder $containerBuilder): void
+    {
+        $containerBuilder->addCompilerPass(new AutoReturnFactoryCompilerPass());
+
+        $containerBuilder->addCompilerPass(new AutoBindParameterCompilerPass());
+        $containerBuilder->addCompilerPass(new AutowireArrayParameterCompilerPass());
     }
 }

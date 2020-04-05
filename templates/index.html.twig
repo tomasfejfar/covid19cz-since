@@ -1,0 +1,41 @@
+{# templates/thanky_you.twig #}
+{% extends "base.html.twig" %}
+
+{% block body %}
+    <div class="card-deck mb-3 text-center">
+        {% for item in items %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ item.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">{{ item.since | date('j. n. Y') }}</h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        {% if item.visible_from < now %}
+                            <li>Mělo by se začít projevovat v omezené míře</li>
+                        {% elseif item.visible_to < now %}
+                            <li>Mělo by se projevit</li>
+                        {% else %}
+                            <li>Projeví se za: {{ item.remaining_days_from }} až {{ item.remaining_days_to }} <a
+                                        href="#why">[?]</a></li>
+                        {% endif %}
+                        <li>Efekt nejdříve {{ item.visible_from | date('j. n. Y') }}</li>
+                        <li>Efekt nejpozději {{ item.visible_to | date('j. n. Y') }}</li>
+                    </ul>
+                    <button type="button" class="btn btn-lg btn-block btn-outline-primary">Sign up for free</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <dl>
+            <dt>Čas za jak dlouho se opatření projeví</dt>
+            <dd>Podle Lina <a href="#ref1">[1]</a> můžeme z počtu úmrtí (což je poměrně přesná hodnota) usuzovat na
+                ostatní věci se zpožděním 21 až 28 dní. Důvodem je to, že symptomy se objevují po 3 až 10 dnech a
+                smrt nastáva průměrně po 18 dnech. Jakékoli opatření, které zavedeme můžeme vyhodnocovat s tímto
+                odpovídajícím odstupem.
+            </dd>
+        </dl>
+    </div>
+{% endblock %}

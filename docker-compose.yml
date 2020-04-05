@@ -5,3 +5,5 @@ services:
     volumes:
       - ./:/code
       - ./data:/data
+    ports:
+    - 8005:8005

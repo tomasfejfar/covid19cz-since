@@ -1,5 +1,6 @@
 {
     "require": {
+        "php": "^7.4",
         "symfony/http-foundation": "^5.0",
         "symfony/asset": "^5.0",
         "symfony/twig-bridge": "^5.0",
@@ -11,12 +12,19 @@
         "symfony/dotenv": "^5.0",
         "doctrine/cache": "^1.10",
         "erusev/parsedown-extra": "^0.8.1",
-        "symplify/symfony-static-dumper": "^7.2"
+        "symplify/symfony-static-dumper": "^7.2",
+        "symplify/auto-bind-parameter": "^7.2",
+        "sensio/framework-extra-bundle": "^5.5"
     },
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
         }
     }
 }
