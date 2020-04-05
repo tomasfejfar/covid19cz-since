@@ -1,45 +1,38 @@
-{# templates/thanky_you.twig #}
 {% extends "base.html.twig" %}
 
 {% block body %}
+    <h2>Opatření, která se plně projevila ({{ active_rulings | length }})</h2>
     <div class="card-deck mb-3 text-center">
-        {% for ruling in rulings %}
-            <div class="card mb-4 shadow-sm {{ ruling.visible_to < now ? 'text-muted' : '' }}">
-                <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">{{ ruling.name }}</h4>
-                </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title">{{ ruling.since | date('j. n. Y') }}</h1>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        {% if ruling.visible_from < now %}
-                            <li>Mělo by se začít projevovat v omezené míře</li>
-                        {% elseif ruling.visible_to < now %}
-                            <li>Mělo by se projevit</li>
-                        {% else %}
-                            <li>Projeví se za: {{ ruling.remaining_days_from }} až {{ ruling.remaining_days_to }} <a
-                                        href="#why">[?]</a></li>
-                        {% endif %}
-                        <li>Efekt nejdříve {{ ruling.visible_from | date('j. n. Y') }}</li>
-                        <li>Efekt nejpozději {{ ruling.visible_to | date('j. n. Y') }}</li>
-                    </ul>
-                    <p>{{ ruling.description }}</p>
-                </div>
-            </div>
-            {% if loop.index % 2 == 0 %}
-                </div>
-                <div class="card-deck mb-3 text-center">
-            {% endif %}
+        {% for ruling in active_rulings %}
+            {% include 'ruling.twig' %}
+        {% endfor %}
+    </div>
+    <h2>Opatření, která se začla projevovat ({{ started_rulings | length }})</h2>
+    <div class="card-deck mb-3 text-center">
+        {% for ruling in started_rulings %}
+            {% include 'ruling.twig' %}
+        {% endfor %}
+    </div>
+    <h2>Opatření, která se tepve projeví ({{ inactive_rulings | length }})</h2>
+    <div class="card-deck mb-3 text-center">
+        {% for ruling in inactive_rulings %}
+            {% include 'ruling.twig' %}
         {% endfor %}
     </div>
 
     <div>
+        <h2>FAQ</h2>
         <dl>
-            <dt>Čas za jak dlouho se opatření projeví</dt>
+            <dt>Podle čeho určíme čas za jak dlouho se opatření projeví</dt>
             <dd>Podle Lina <a href="#ref1">[1]</a> můžeme z počtu úmrtí (což je poměrně přesná hodnota) usuzovat na
-                ostatní věci se zpožděním 21 až 28 dní. Důvodem je to, že symptomy se objevují po 3 až 10 dnech a
-                smrt nastáva průměrně po 18 dnech. Jakékoli opatření, které zavedeme můžeme vyhodnocovat s tímto
+                ostatní věci se zpožděním 21 až 28 dní. Důvodem je to, že symptomy (hospitalizace) se objevují po 3 až
+                10 dnech a
+                smrt nastáva průměrně po 18 dnech hospitalizace. Jakékoli opatření, která zavedeme, můžeme tedy
+                vyhodnocovat jen s tímto
                 odpovídajícím odstupem.
             </dd>
+            <dt>Co když jsem našel/a chybu?</dt>
+            <dd>Udělejte issue na githubu nebo mi napište třeba na <a href="http://m.me/tomasfejfar">FB messenger</a></dd>
         </dl>
     </div>
 {% endblock %}

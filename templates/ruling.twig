@@ -1,0 +1,25 @@
+<div class="card mb-4 shadow-sm {{ ruling.visibleTo < now ? 'text-muted' : '' }}">
+    <div class="card-header">
+        <h4 class="my-0 font-weight-normal">{{ ruling.name }}</h4>
+    </div>
+    <div class="card-body">
+        <h1 class="card-title pricing-card-title">{{ ruling.since | date('j. n. Y') }}</h1>
+        <ul class="list-unstyled mt-3 mb-4">
+            {% if ruling.isStarted %}
+                <li>Projevuje se v omezené míře ({{ ruling.activePercent }}%)</li>
+            {% elseif ruling.isActive %}
+                <li>Plně se projevuje</li>
+            {% else %}
+                <li>Projeví se za: {{ ruling.remainingDaysMin }} až {{ ruling.remainingDaysMax }} dnů <a
+                            href="#why">[?]</a></li>
+            {% endif %}
+            <li>Efekt nejdříve {{ ruling.visibleFrom | date('j. n. Y') }}</li>
+            <li>Efekt nejpozději {{ ruling.visibleTo | date('j. n. Y') }}</li>
+        </ul>
+        <p>{{ ruling.description }} <a href="{{ ruling.more() }}">Více...</a></p>
+    </div>
+</div>
+{% if loop.index % 2 == 0 %}
+    </div>
+    <div class="card-deck mb-3 text-center">
+{% endif %}
