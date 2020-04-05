@@ -24,7 +24,8 @@
 <div class="container">
     <div class="row">
         <div class="col-12 col-md">
-    <p>Zatím je v systému zadáno {{ total_rulings }} nejstarších opatření</p>
+    <p>Zatím je v systému zadáno {{ total_rulings }} opatření. Data naposled aktualizována {{ 'now' | date('j. n. Y
+    H:i:s T') }}</p>
         </div>
     </div>
     {% block body %}{% endblock %}
